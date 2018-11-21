@@ -14,11 +14,8 @@ namespace MyCoreTest.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            var result = Add(2,3);
             return new JsonResult("OK");
         }
-
-        public int Add(int a, int b) => a + b;
 
     }
 }
