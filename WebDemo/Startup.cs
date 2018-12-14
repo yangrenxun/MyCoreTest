@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebDemo.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MyCoreTest
+namespace WebDemo
 {
     public class Startup
     {
@@ -32,7 +33,12 @@ namespace MyCoreTest
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-            services.Configure<Content>(Configuration.GetSection(""));
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
@@ -40,58 +46,10 @@ namespace MyCoreTest
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // 登录
-            app.Map("/login", builder => builder.Use(next =>
-            {
-                return async (context) =>
-                {
-                    var claimIdentity = new ClaimsIdentity();
-                    claimIdentity.AddClaim(new Claim(ClaimTypes.Name, "jim"));
-                    await context.SignInAsync("myScheme", new ClaimsPrincipal(claimIdentity));
-                };
-            }));
-
-            // 退出
-            app.Map("/logout", builder => builder.Use(next =>
-            {
-                return async (context) =>
-                {
-                    await context.SignOutAsync("myScheme");
-                };
-            }));
-
-            // 认证
-            app.Use(next =>
-            {
-                return async (context) =>
-                {
-                    var result = await context.AuthenticateAsync("myScheme");
-                    if (result?.Principal != null) context.User = result.Principal;
-                    await next(context);
-                };
-            });
-
-            // 授权
-            app.Use(async (context, next) =>
-            {
-                var user = context.User;
-                if (user?.Identity?.IsAuthenticated ?? false)
-                {
-                    if (user.Identity.Name != "jim") await context.ForbidAsync("myScheme");
-                    else await next();
-                }
-                else
-                {
-                    await context.ChallengeAsync("myScheme");
-                }
-            });
-
-            // 访问受保护资源
-            app.Map("/resource", builder => builder.Run(async (context) => await context.Response.WriteAsync("Hello, ASP.NET Core!")));
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -104,7 +62,7 @@ namespace MyCoreTest
             app.UseCookiePolicy();
 
             app.UseAuthentication();
-            
+            //app.UseIdentityServer();
 
             app.UseMvc(routes =>
             {
