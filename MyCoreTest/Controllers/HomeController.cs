@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyCoreTest.Models;
+using RabbitMQ;
 
 namespace MyCoreTest.Controllers
 {
@@ -38,6 +39,18 @@ namespace MyCoreTest.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Send()
+        {
+            producer.SendMessage("hello word");
+            return Content("");
+        }
+
+        public IActionResult Receive()
+        {
+            var msg = Consumer.ReceiveMessage();
+            return Content(msg);
         }
     }
 }
