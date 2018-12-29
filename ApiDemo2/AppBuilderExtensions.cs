@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ConsulDemo
+namespace ApiDemo2
 {
     public static class AppBuilderExtensions
     {

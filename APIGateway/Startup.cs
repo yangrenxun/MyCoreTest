@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Consul;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace APIGateway
@@ -35,7 +36,7 @@ namespace APIGateway
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
-            services.AddOcelot(Configuration);
+            services.AddOcelot(Configuration).AddConsul();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

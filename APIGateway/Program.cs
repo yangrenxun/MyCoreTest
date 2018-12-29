@@ -23,6 +23,7 @@ namespace APIGateway
                             //.UseUrls($"http://{IP}:{Port}")
                             .ConfigureAppConfiguration((hostingContext, builder) =>
                             {
+                                builder.AddJsonFile("appsettings.json");
                                 builder.AddJsonFile("configuration.json", false, true);
                             });
     }
